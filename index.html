@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            overflow: hidden;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .font-pacifico {
+            font-family: 'Pacifico', cursive;
+        }
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .heart {
+            position: absolute;
+            color: #ff4d6d;
+            animation: float 3s linear forwards;
+            opacity: 0;
+            z-index: 60;
+            pointer-events: none;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+        .btn-transition {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.4s ease, top 0.4s ease;
+        }
+        #no-btn {
+            position: absolute;
+            z-index: 20;
+            white-space: nowrap;
+        }
+        #yes-btn {
+            position: relative;
+            z-index: 30;
+        }
+        #main-image {
+            max-width: 300px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        }
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6 2.686-6 6 0 2.21 1.79 4 4 4 3.314 0 6-2.686 6-6zm25.5 10c0-2.21-1.79-4-4-4-3.314 0-6 2.686-6 6 0 2.21 1.79 4 4 4 3.314 0 6-2.686 6-6z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+            pointer-events: none;
+        }
+        #content-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="bg-pattern"></div>
+    <canvas id="fireworks" class="canvas-container"></canvas>
+
+    <div id="content-wrapper">
+        <!-- Image Section -->
+        <div class="mb-6">
+            <img id="main-image" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIycGZ4bm9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uJnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/c76IJLufpNwSULPk77/giphy.gif" 
+                 alt="Valentine GIF">
+        </div>
+
+        <!-- Text Section -->
+        <h1 id="question-text" class="text-4xl md:text-5xl font-pacifico text-white drop-shadow-lg mb-12 text-center px-4">
+            Will u be my valentine?
+        </h1>
+
+        <!-- Buttons Section -->
+        <div id="button-area" class="w-full h-48 relative flex items-start justify-center">
+            <button id="yes-btn" class="btn-transition bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-pink-300/50 hover:shadow-2xl text-white font-bold py-4 px-12 rounded-full shadow-lg text-2xl">
+                Yes
+            </button>
+            <button id="no-btn" class="btn-transition bg-white text-rose-500 border-2 border-white font-bold py-2 px-8 rounded-full shadow-xl text-lg mt-24">
+                No
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const noTexts = ["No", "Please my love", "Please don't click", "Babe please"];
+        const images = [
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIycGZ4bm9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uJnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/c76IJLufpNwSULPk77/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3RkNXNueWJ6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/OPU6wUKARAztfpcSGn/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L95W4wv8nnb9K/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXN6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26hpKz76S7LW37CBa/giphy.gif"
+        ];
+        
+        const finalImage = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l4pTdcifP_FPl615m/giphy.gif";
+
+        let noClickCount = 0;
+        let yesScale = 1;
+        let noScale = 1;
+
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const mainImg = document.getElementById('main-image');
+        const questionText = document.getElementById('question-text');
+        const buttonArea = document.getElementById('button-area');
+
+        // Move "No" button logic
+        function moveNoButton() {
+            // Screen dimensions with padding
+            const padding = 80;
+            const maxWidth = window.innerWidth - padding;
+            const maxHeight = window.innerHeight - padding;
+
+            // Generate random absolute position anywhere on the screen
+            const randomX = Math.max(padding, Math.random() * maxWidth);
+            const randomY = Math.max(padding, Math.random() * maxHeight);
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+            noBtn.style.marginTop = '0';
+            noBtn.style.transform = `translate(-50%, -50%) scale(${noScale})`;
+        }
+
+        noBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent accidental background triggers
+            noClickCount++;
+            
+            // Update UI
+            noBtn.innerText = noTexts[noClickCount % noTexts.length];
+            mainImg.src = images[noClickCount % images.length];
+
+            // Change Scaling
+            yesScale += 0.5;
+            noScale -= 0.1;
+            if (noScale < 0.3) noScale = 0.3;
+
+            yesBtn.style.transform = `scale(${yesScale})`;
+            
+            // Move and Stop
+            moveNoButton();
+            spawnHeart();
+        });
+
+        // Firework logic
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 15,
+                    y: (Math.random() - 0.5) * 15
+                };
+                this.alpha = 1;
+                this.friction = 0.95;
+                this.gravity = 0.2;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+        }
+
+        function animateFireworks() {
+            requestAnimationFrame(animateFireworks);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                if (p.alpha > 0) {
+                    p.update();
+                    p.draw();
+                } else {
+                    particles.splice(i, 1);
+                }
+            });
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#ffffff', '#ff0054', '#ffbd00', '#f900bf', '#00f5d4', '#fee440'];
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        yesBtn.addEventListener('click', () => {
+            questionText.innerText = "Yay, conguration my love";
+            mainImg.src = finalImage;
+            
+            // Cleanup UI
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none';
+            
+            animateFireworks();
+            
+            // Sequence of fireworks
+            let fireworkCount = 0;
+            const fireworkTimer = setInterval(() => {
+                createFirework(
+                    Math.random() * canvas.width, 
+                    Math.random() * canvas.height * 0.7
+                );
+                fireworkCount++;
+                if (fireworkCount > 30) {
+                    // Stay at a steady rate after initial burst
+                }
+            }, 500);
+
+            setInterval(spawnHeart, 150);
+        });
+
+        function spawnHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.className = 'heart';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '100vh';
+            heart.style.fontSize = (Math.random() * 30 + 10) + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
