@@ -16,7 +16,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            touch-action: manipulation;
+            touch-action: none;
         }
         .font-pacifico {
             font-family: 'Pacifico', cursive;
@@ -43,18 +43,20 @@
             100% { transform: translateY(-100vh) scale(1.5) rotate(360deg); opacity: 0; }
         }
         .btn-transition {
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.4s ease, top 0.4s ease;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.3s ease, top 0.3s ease;
         }
         #no-btn {
             position: absolute;
             z-index: 100;
             white-space: nowrap;
             touch-action: none;
+            left: 50%;
+            transform: translateX(-50%);
         }
         #yes-btn {
             position: relative;
             z-index: 30;
-            max-width: 90vw;
+            max-width: 95vw;
         }
         #main-image {
             width: 80vw;
@@ -91,18 +93,18 @@
     <canvas id="fireworks" class="canvas-container"></canvas>
 
     <div id="content-wrapper">
-        <!-- Image Section -->
+         <h1 id="question-text" class="text-3xl md:text-5xl font-pacifico text-white drop-shadow-lg mb-8 md:mb-12 text-center px-4 leading-tight">
+              Will you be my valentine? ❣️🙆
+        </h1>
+
         <div class="mb-4 md:mb-6">
             <img id="main-image" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIycGZ4bm9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uJnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/c76IJLufpNwSULPk77/giphy.gif" 
                  alt="Valentine GIF">
         </div>
 
-        <!-- Text Section -->
-        <h1 id="question-text" class="text-3xl md:text-5xl font-pacifico text-white drop-shadow-lg mb-8 md:mb-12 text-center px-4 leading-tight">
-             Will you be my valentine? ❣️
-        </h1>
+         <h3 id="description-text" class="text-3xl md:text-5xl font-pacifico text-white drop-shadow-lg mb-8 md:mb-12 text-center px-4 leading-tight">
+        </h3>
 
-        <!-- Buttons Section -->
         <div id="button-area" class="w-full h-40 md:h-48 relative flex items-start justify-center">
             <button id="yes-btn" class="btn-transition bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-pink-300/50 hover:shadow-2xl text-white font-bold py-3 md:py-4 px-8 md:px-12 rounded-full shadow-lg text-xl md:text-2xl">
                 Yes
@@ -114,47 +116,55 @@
     </div>
 
     <script>
-        const noTexts = ["No", "Please BuBu 🥺", "Please don't click", "Please Mwach chi lay 🥺", "Please don't click kalaylay"];
+        const noTexts = ["No", "Please BuBu 🥺", "ဟိုး stop မလုပ်ပါနဲ့ 🥺", "Please Mwach chi lay 🥺", "Please don't click kalaylay", "Catch me! 😍"];
         const images = [
             "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIycGZ4bm9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uam9ueG9uJnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/c76IJLufpNwSULPk77/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3RkNXNueWJ6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYnB0PW0mZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/OPU6wUKARAztfpcSGn/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L95W4wv8nnb9K/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXN6eHpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26hpKz76S7LW37CBa/giphy.gif"
+            'images/image_1.jpg',
+            'images/image_2.jpg',
+            'images/image_3.gif',
+            'images/image_4.gif',
+            'images/image_5.gif',
+            'images/image_6.jpg',
         ];
         
-        const finalImage = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnpxYnF6eHpxYnF6eHpxYnF6eHpxYmZzZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l4pTdcifP_FPl615m/giphy.gif";
+        const finalImage = 'images/final.gif';
 
         let noClickCount = 0;
         let yesScale = 1;
         let noScale = 1;
         let isLoopCompleted = false;
+        let lastActionTime = 0;
 
         const yesBtn = document.getElementById('yes-btn');
         const noBtn = document.getElementById('no-btn');
         const mainImg = document.getElementById('main-image');
         const questionText = document.getElementById('question-text');
-        const buttonArea = document.getElementById('button-area');
+        const descriptionText = document.getElementById('description-text');
 
         function moveNoButton() {
-            // Respect mobile viewport bounds
-            const padding = 60;
-            const maxWidth = window.innerWidth - padding;
-            const maxHeight = window.innerHeight - padding;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            
+            const padding = 80;
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
 
-            const randomX = Math.max(padding, Math.random() * maxWidth);
-            const randomY = Math.max(padding, Math.random() * maxHeight);
+            const maxX = vw - btnWidth - padding;
+            const maxY = vh - btnHeight - padding;
+
+            const randomX = Math.max(padding, Math.random() * maxX);
+            const randomY = Math.max(padding, Math.random() * maxY);
 
             noBtn.style.position = 'fixed';
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
-            noBtn.style.marginTop = '0';
-            noBtn.style.transform = `translate(-50%, -50%) scale(${noScale})`;
+            noBtn.style.margin = '0';
+            noBtn.style.transform = `scale(${noScale})`;
         }
 
-        // Runaway logic for both Mouse and Touch
-        const handleProximity = (clientX, clientY) => {
+        const handleInteractionProximity = (clientX, clientY) => {
             if (!isLoopCompleted) return;
-
+            
             const btnRect = noBtn.getBoundingClientRect();
             const btnCenterX = btnRect.left + btnRect.width / 2;
             const btnCenterY = btnRect.top + btnRect.height / 2;
@@ -163,31 +173,49 @@
                 Math.pow(clientX - btnCenterX, 2) + Math.pow(clientY - btnCenterY, 2)
             );
 
-            if (distance < 100) {
+            // On mobile, distance threshold needs to be high because of finger size
+            if (distance < 150) {
                 moveNoButton();
             }
         };
 
-        document.addEventListener('mousemove', (e) => handleProximity(e.clientX, e.clientY));
-        document.addEventListener('touchmove', (e) => {
+        window.addEventListener('mousemove', (e) => handleInteractionProximity(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
             if (e.touches.length > 0) {
-                handleProximity(e.touches[0].clientX, e.touches[0].clientY);
+                handleInteractionProximity(e.touches[0].clientX, e.touches[0].clientY);
             }
-        });
+        }, { passive: true });
 
-        noBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        window.addEventListener('touchstart', (e) => {
+            if (isLoopCompleted && e.touches.length > 0) {
+                handleInteractionProximity(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        const onNoAction = (e) => {
+            if (e) {
+                if (isLoopCompleted) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveNoButton();
+                    return;
+                }
+            }
+            
+            if (Date.now() - lastActionTime < 250) return;
+            lastActionTime = Date.now();
+
             noClickCount++;
             
-            if (noClickCount >= noTexts.length) {
+            if (noClickCount >= noTexts.length - 1) {
                 isLoopCompleted = true;
             }
-            
+
             noBtn.innerText = noTexts[noClickCount % noTexts.length];
             mainImg.src = images[noClickCount % images.length];
 
-            // Scales
-            yesScale += 0.4;
+            // Substantial Yes scaling
+            yesScale += 0.7; 
             noScale -= 0.1;
             if (noScale < 0.4) noScale = 0.4;
 
@@ -195,9 +223,12 @@
             
             moveNoButton();
             spawnHeart();
-        });
+        };
 
-        // Firework logic
+        noBtn.addEventListener('click', onNoAction);
+        noBtn.addEventListener('touchstart', onNoAction, { passive: false });
+
+        // Fireworks logic
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -215,18 +246,18 @@
                 this.y = y;
                 this.color = color;
                 this.velocity = {
-                    x: (Math.random() - 0.5) * (window.innerWidth < 768 ? 10 : 15),
-                    y: (Math.random() - 0.5) * (window.innerWidth < 768 ? 10 : 15)
+                    x: (Math.random() - 0.5) * (window.innerWidth < 768 ? 8 : 12),
+                    y: (Math.random() - 0.5) * (window.innerWidth < 768 ? 8 : 12)
                 };
                 this.alpha = 1;
-                this.friction = 0.95;
-                this.gravity = 0.2;
+                this.friction = 0.96;
+                this.gravity = 0.15;
             }
             draw() {
                 ctx.save();
                 ctx.globalAlpha = this.alpha;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2, false);
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2, false);
                 ctx.fillStyle = this.color;
                 ctx.fill();
                 ctx.restore();
@@ -237,7 +268,7 @@
                 this.velocity.y += this.gravity;
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
-                this.alpha -= 0.015;
+                this.alpha -= 0.012;
             }
         }
 
@@ -256,28 +287,20 @@
 
         function createFirework(x, y) {
             const colors = ['#ffffff', '#ff0054', '#ffbd00', '#f900bf', '#00f5d4', '#fee440'];
-            for (let i = 0; i < (window.innerWidth < 768 ? 40 : 60); i++) {
+            for (let i = 0; i < (window.innerWidth < 768 ? 30 : 50); i++) {
                 particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
             }
         }
 
         yesBtn.addEventListener('click', () => {
-            questionText.innerText = "Yay, conguration my love";
+            questionText.innerText = "❣️🎉 Happy 4 years & 1 month anniversary my love 🎉❣️";
+            descriptionText.innerText = "4 years and 1 month together — and my love for you only keeps growing. Thank you for being my safe place, my biggest smile, for making me stronger, and for being my sweetest blessing.  I love you more than words can say. Happy anniversary, my love bubu."
             mainImg.src = finalImage;
-            
             noBtn.style.display = 'none';
             yesBtn.style.display = 'none';
-            
             animateFireworks();
-            
-            setInterval(() => {
-                createFirework(
-                    Math.random() * canvas.width, 
-                    Math.random() * canvas.height * 0.7
-                );
-            }, 600);
-
-            setInterval(spawnHeart, 250);
+            setInterval(() => createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6), 700);
+            setInterval(spawnHeart, 300);
         });
 
         function spawnHeart() {
@@ -286,7 +309,7 @@
             heart.className = 'heart';
             heart.style.left = Math.random() * 100 + 'vw';
             heart.style.top = '100vh';
-            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 3000);
         }
